@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  DEV_PKG_VERSION: v20250306-r1
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: test
+    steps:
+      - name: Install packages
+        run: |
+          sudo apt install cpanminus etcd-server etcd-client
+          sudo systemctl start etcd
+          wget https://github.com/yuweizzz/apisix-dev-package/releases/download/${DEV_PKG_VERSION}/apisix-dev_${DEV_PKG_VERSION}_amd64.deb
+          sudo dpkg -i apisix-dev_${DEV_PKG_VERSION}_amd64.deb
+
+      - name: Install test-nginx
+        run: |
+          cd /usr/local/apisix-dev/apisix-master
+          sudo cpanm --notest Test::Nginx IPC::Run > build.log 2>&1 || (cat build.log && exit 1)
+          git submodule update --init --recursive t/toolkit/
+          git clone https://github.com/openresty/test-nginx.git
+
+      - name: Checkout patch
+        uses: actions/checkout@v4
+
+      - name: Run test
+        run: |
+          cp ocsp-stapling.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          export PATH=/usr/local/apisix-dev/openresty/bin:$PATH
+          export PERL5LIB=.:$PERL5LIB
+          export TEST_NGINX_BINARY=/usr/local/apisix-dev/openresty/nginx/sbin/nginx
+          cd /usr/local/apisix-dev/apisix-master
+          /usr/local/apisix-dev/apisix-master/bin/apisix init
+          /usr/local/apisix-dev/apisix-master/bin/apisix init_etcd
+          prove -I test-nginx/lib -r t/plugin/ocsp-stapling.t

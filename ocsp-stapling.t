@@ -25,7 +25,7 @@ no_shuffle();
 
 my $openssl_bin = $ENV{OPENSSL_BIN};
 if (! -x $openssl_bin) {
-    $ENV{OPENSSL_BIN} = '/usr/local/openresty/openssl3/bin/openssl';
+    $ENV{OPENSSL_BIN} = '/usr/bin/openssl';
     if (! -x $ENV{OPENSSL_BIN}) {
         plan(skip_all => "openssl3 not installed");
     }
