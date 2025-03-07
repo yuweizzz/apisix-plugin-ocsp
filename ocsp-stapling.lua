@@ -183,15 +183,15 @@ local function set_cert_and_key(sni, value)
             core.log.error("no ocsp response send: ", err)
             return true
         end
-    fi
+    end
 
---    local ok, err = set_ocsp_resp(der_cert_chain,
---                                  responder,
---                                  value.ocsp_stapling.skip_verify,
---                                  value.ocsp_stapling.cache_ttl)
---    if not ok then
---        core.log.error("no ocsp response send: ", err)
---    end
+    local ok, err = set_ocsp_resp(der_cert_chain,
+                                  responder,
+                                  value.ocsp_stapling.skip_verify,
+                                  value.ocsp_stapling.cache_ttl)
+    if not ok then
+        core.log.error("no ocsp response send: ", err)
+    end
 
     return true
 end
