@@ -164,7 +164,7 @@ local function set_cert_and_key(sni, value)
     local responder = value.ocsp_stapling.ssl_stapling_responder
     if responder == nil then
         -- no overrides responder, get ocsp responder from cert
-        local responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
+        responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
         if not responder then
             -- if cert not support ocsp, the report error is nil
             if not err then
@@ -219,7 +219,8 @@ function _M.rewrite(conf, ctx)
             local responder = matched_ssl.value.ocsp_stapling.ssl_ocsp_responder
             if responder == nil then
                 -- no overrides responder, get ocsp responder from cert
-                local responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
+                local err
+                responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
                 if not responder then
                     -- if cert not support ocsp, the report error is nil
                     if not err then
