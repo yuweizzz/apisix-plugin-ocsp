@@ -140,4 +140,3 @@ After modifying the config file, reload APISIX or send an hot-loaded HTTP reques
 ```shell
 curl http://127.0.0.1:9180/apisix/admin/plugins/reload -H "X-API-KEY: $admin_key" -X PUT
 ```
-

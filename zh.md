@@ -142,4 +142,3 @@ plugins:
 ```shell
 curl http://127.0.0.1:9180/apisix/admin/plugins/reload -H "X-API-KEY: $admin_key" -X PUT
 ```
-
