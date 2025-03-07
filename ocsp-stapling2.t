@@ -25,7 +25,7 @@ no_shuffle();
 
 my $openssl_bin = $ENV{OPENSSL_BIN};
 if (! -x $openssl_bin) {
-    $ENV{OPENSSL_BIN} = '/usr/local/openresty/openssl3/bin/openssl';
+    $ENV{OPENSSL_BIN} = '/usr/bin/openssl';
     if (! -x $ENV{OPENSSL_BIN}) {
         plan(skip_all => "openssl3 not installed");
     }
@@ -204,7 +204,7 @@ GET /t
 location /t {
     content_by_lua_block {
         local shell = require("resty.shell")
-        local cmd = [[ /usr/local/openresty/openssl3/bin/openssl ocsp -index t/certs/ocsp/index.txt -port 11451 -rsigner t/certs/ocsp/signer.crt -rkey t/certs/ocsp/signer.key -CA t/certs/apisix.crt -nrequest 4 2>&1 1>/dev/null & ]]
+        local cmd = [[ /usr/bin/openssl ocsp -index t/certs/ocsp/index.txt -port 11451 -rsigner t/certs/ocsp/signer.crt -rkey t/certs/ocsp/signer.key -CA t/certs/apisix.crt -nrequest 4 2>&1 1>/dev/null & ]]
         local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 1000, 8096)
         if not ok then
             ngx.log(ngx.WARN, "failed to execute the script with status: " .. status or "nil" .. ", reason: " .. reason .. ", stderr: " .. stderr)
@@ -316,7 +316,7 @@ GET /t
 location /t {
     content_by_lua_block {
         local shell = require("resty.shell")
-        local cmd = [[ /usr/local/openresty/openssl3/bin/openssl ocsp -index t/certs/ocsp/index.txt -port 12345 -rsigner t/certs/ocsp/signer.crt -rkey t/certs/ocsp/signer.key -CA t/certs/apisix.crt -nrequest 4 2>&1 1>/dev/null & ]]
+        local cmd = [[ /usr/bin/openssl ocsp -index t/certs/ocsp/index.txt -port 12345 -rsigner t/certs/ocsp/signer.crt -rkey t/certs/ocsp/signer.key -CA t/certs/apisix.crt -nrequest 4 2>&1 1>/dev/null & ]]
         local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 1000, 8096)
         if not ok then
             ngx.log(ngx.WARN, "failed to execute the script with status: " .. status or "nil" .. ", reason: " .. reason .. ", stderr: " .. stderr)
