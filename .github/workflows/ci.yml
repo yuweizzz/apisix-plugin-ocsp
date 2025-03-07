@@ -36,7 +36,6 @@ jobs:
       - name: Run test
         run: |
           cp ocsp-stapling.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
-          cat -n /usr/local/apisix-dev/apisix-master/apisix/plugins/ocsp-stapling.lua
           cp ocsp-stapling.t /usr/local/apisix-dev/apisix-master/t/plugin/
           cp ocsp-stapling2.t /usr/local/apisix-dev/apisix-master/t/plugin/
           export PATH=/usr/local/apisix-dev/openresty/bin:$PATH

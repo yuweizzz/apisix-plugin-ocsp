@@ -168,7 +168,7 @@ local function set_cert_and_key(sni, value)
         if not responder then
             -- if cert not support ocsp, the report error is nil
             if not err then
-                core.log.error("failed to get ocsp responder:" .. 
+                core.log.error("failed to get ocsp responder: " .. 
                                "cert not contains authority_information_access extension")
                 return true
             end
@@ -223,7 +223,7 @@ function _M.rewrite(conf, ctx)
                 if not responder then
                     -- if cert not support ocsp, the report error is nil
                     if not err then
-                        core.log.error("failed to get ocsp responder:" .. 
+                        core.log.error("failed to get ocsp responder: " .. 
                                        "cert not contains authority_information_access extension")
                         return 495
                     end

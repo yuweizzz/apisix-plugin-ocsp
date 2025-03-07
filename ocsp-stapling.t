@@ -269,7 +269,7 @@ echo -n "Q" | $OPENSSL_BIN s_client -connect localhost:1994 -servername test.com
 --- response_body eval
 qr/CONNECTED/
 --- error_log
-no ocsp response send: failed to get ocsp url: cert not contains authority_information_access extension
+failed to get ocsp responder: cert not contains authority_information_access extension
 
 
 
@@ -279,7 +279,7 @@ echo -n "Q" | $OPENSSL_BIN s_client -connect localhost:1994 -servername test.com
 --- response_body eval
 qr/OCSP response: no response sent/
 --- error_log
-no ocsp response send: failed to get ocsp url: cert not contains authority_information_access extension
+failed to get ocsp responder: cert not contains authority_information_access extension
 
 
 
