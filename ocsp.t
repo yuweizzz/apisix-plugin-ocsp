@@ -114,7 +114,7 @@ location /t {
 {"ssl_ocsp":"off","ssl_stapling":true,"ssl_stapling_verify":true}
 {"ssl_ocsp":"off","ssl_stapling":false,"ssl_stapling_verify":true}
 {"ssl_ocsp":"off","ssl_stapling":true,"ssl_stapling_verify":true}
-{"ssl_ocsp":"off","ssl_stapling":true,ssl_stapling_responder:"http://localhost","ssl_stapling_verify":true}
+{"ssl_ocsp":"off","ssl_stapling":true,"ssl_stapling_responder":"http://localhost","ssl_stapling_verify":true}
 {"ssl_ocsp":"leaf","ssl_stapling":false,"ssl_stapling_verify":true}
 {"ssl_ocsp":"leaf","ssl_ocsp_responder":"http://localhost","ssl_stapling":false,"ssl_stapling_verify":true}
 

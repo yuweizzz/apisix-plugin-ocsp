@@ -37,7 +37,7 @@ jobs:
         run: |
           cp ocsp.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
           cp ocsp.t /usr/local/apisix-dev/apisix-master/t/plugin/
-          cp ocsp.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp ocsp2.t /usr/local/apisix-dev/apisix-master/t/plugin/
           cp -r certs /usr/local/apisix-dev/apisix-master/t/apisix-plugin-ocsp/
           sed -i 's/ocsp-stapling/ocsp/g' /usr/local/apisix-dev/apisix-master/apisix/cli/ngx_tpl.lua
           sed -i 's/ocsp-stapling/ocsp/g' /usr/local/apisix-dev/apisix-master/t/APISIX.pm

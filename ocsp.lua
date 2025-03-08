@@ -129,7 +129,7 @@ local function set_cert_and_key(sni, value)
     end
 
     if not value.ocsp then
-        core.log.info("no 'ocsp' field found, no need to run ocsp-stapling plugin")
+        core.log.info("no 'ocsp' field found, no need to run ocsp plugin")
         return original_set_cert_and_key(sni, value)
     end
 
