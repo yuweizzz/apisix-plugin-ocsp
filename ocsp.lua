@@ -100,7 +100,7 @@ local function set_ocsp_resp(der_cert_chain, responder, need_verify)
     if need_verify then
         local ok, next_update_or_err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
         if not ok then
-            return false, "failed to validate ocsp response: " .. err
+            return false, "failed to validate ocsp response: " .. next_update_or_err
         end
         -- next_update present
         if next_update_or_err ~= nil then
@@ -246,7 +246,7 @@ function _M.rewrite(conf, ctx)
 
         local ocsp_ok, next_update_or_err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
         if not ocsp_ok then
-            core.log.error("failed to validate ocsp response: ", err)
+            core.log.error("failed to validate ocsp response: ", next_update_or_err)
             return 495
         end
         -- next_update present
