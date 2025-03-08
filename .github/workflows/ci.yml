@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
   workflow_dispatch:
 
 env:
@@ -31,14 +30,19 @@ jobs:
 
       - name: Checkout patch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Run test
         run: |
+          cp ocsp-stapling.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
           cp ocsp-stapling.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp ocsp-stapling2.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp -r certs /usr/local/apisix-dev/apisix-master/t/apisix-plugin-ocsp/
           export PATH=/usr/local/apisix-dev/openresty/bin:$PATH
           export PERL5LIB=.:$PERL5LIB
           export TEST_NGINX_BINARY=/usr/local/apisix-dev/openresty/nginx/sbin/nginx
           cd /usr/local/apisix-dev/apisix-master
           /usr/local/apisix-dev/apisix-master/bin/apisix init
           /usr/local/apisix-dev/apisix-master/bin/apisix init_etcd
-          prove -I test-nginx/lib -r t/plugin/ocsp-stapling.t
+          prove -I test-nginx/lib -r t/plugin/ocsp-stapling*
