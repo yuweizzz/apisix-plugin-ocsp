@@ -59,7 +59,8 @@ local function fetch_ocsp_resp(der_cert_chain, responder)
     end
 
     local httpc = http.new()
-    local res, err = httpc:request_uri(responder, {
+    local res
+    res, err = httpc:request_uri(responder, {
         method = "POST",
         headers = {
             ["Content-Type"] = "application/ocsp-request",
@@ -89,6 +90,7 @@ local function set_ocsp_resp(der_cert_chain, responder, skip_verify, cache_ttl)
     local ocsp_resp = ocsp_resp_cache:get(der_cert_chain)
     if ocsp_resp == nil then
         core.log.info("ocsp response cache not found, fetch it from ocsp responder")
+        local err
         ocsp_resp, err = fetch_ocsp_resp(der_cert_chain, responder)
         if ocsp_resp == nil then
             return false, err
@@ -155,7 +157,8 @@ local function set_cert_and_key(sni, value)
         end
     end
 
-    local der_cert_chain, err = ngx_ssl.cert_pem_to_der(fin_pem_cert)
+    local der_cert_chain
+    der_cert_chain, err = ngx_ssl.cert_pem_to_der(fin_pem_cert)
     if not der_cert_chain then
         core.log.error("no ocsp response send: ", err)
         return true
@@ -168,7 +171,7 @@ local function set_cert_and_key(sni, value)
         if not responder then
             -- if cert not support ocsp, the report error is nil
             if not err then
-                core.log.error("failed to get ocsp responder: " .. 
+                core.log.error("failed to get ocsp responder: " ..
                                "cert not contains authority_information_access extension")
                 return true
             end
@@ -177,10 +180,10 @@ local function set_cert_and_key(sni, value)
         end
     end
 
-    local ok, err = set_ocsp_resp(der_cert_chain,
-                                  responder,
-                                  value.ocsp_stapling.skip_verify,
-                                  value.ocsp_stapling.cache_ttl)
+    ok, err = set_ocsp_resp(der_cert_chain,
+                            responder,
+                            value.ocsp_stapling.skip_verify,
+                            value.ocsp_stapling.cache_ttl)
     if not ok then
         core.log.error("no ocsp response send: ", err)
     end
@@ -219,12 +222,11 @@ function _M.rewrite(conf, ctx)
             local responder = matched_ssl.value.ocsp_stapling.ssl_ocsp_responder
             if responder == nil then
                 -- no overrides responder, get ocsp responder from cert
-                local err
                 responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
                 if not responder then
                     -- if cert not support ocsp, the report error is nil
                     if not err then
-                        core.log.error("failed to get ocsp responder: " .. 
+                        core.log.error("failed to get ocsp responder: " ..
                                        "cert not contains authority_information_access extension")
                         return 495
                     end
@@ -242,7 +244,8 @@ function _M.rewrite(conf, ctx)
                                 ocsp_resp, matched_ssl.value.ocsp_stapling.cache_ttl)
         end
 
-        local ocsp_ok, err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
+        local ocsp_ok
+        ocsp_ok, err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
         if not ocsp_ok then
             core.log.error("failed to validate ocsp response: ", err)
             return 495
