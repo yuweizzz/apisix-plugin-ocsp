@@ -47,4 +47,5 @@ jobs:
           cd /usr/local/apisix-dev/apisix-master
           /usr/local/apisix-dev/apisix-master/bin/apisix init
           /usr/local/apisix-dev/apisix-master/bin/apisix init_etcd
-          prove -I test-nginx/lib -r t/plugin/ocsp*
+          prove -I test-nginx/lib -r t/plugin/ocsp.t
+          prove -I test-nginx/lib -r t/plugin/ocsp2.t
