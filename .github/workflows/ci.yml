@@ -38,6 +38,7 @@ jobs:
           cp ocsp-stapling.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
           cp ocsp-stapling.t /usr/local/apisix-dev/apisix-master/t/plugin/
           cp ocsp-stapling2.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp -r certs /usr/local/apisix-dev/apisix-master/t/apisix-plugin-ocsp/
           export PATH=/usr/local/apisix-dev/openresty/bin:$PATH
           export PERL5LIB=.:$PERL5LIB
           export TEST_NGINX_BINARY=/usr/local/apisix-dev/openresty/nginx/sbin/nginx

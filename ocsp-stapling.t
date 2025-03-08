@@ -59,8 +59,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/apisix.crt")
-        local ssl_key =  t.read_file("t/certs/apisix.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/apisix.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/apisix.key")
 
         local data = {
             cert = ssl_cert,
@@ -129,8 +129,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/apisix.crt")
-        local ssl_key =  t.read_file("t/certs/apisix.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/apisix.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/apisix.key")
 
         local data = {
             cert = ssl_cert,
@@ -184,8 +184,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_good.crt")
-        local ssl_key =  t.read_file("t/certs/ocsp/rsa_good.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_good.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/rsa_good.key")
 
         local data = {
             cert = ssl_cert,
@@ -232,8 +232,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/apisix.crt")
-        local ssl_key =  t.read_file("t/certs/apisix.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/apisix.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/apisix.key")
 
         local data = {
             cert = ssl_cert,
@@ -288,7 +288,7 @@ failed to get ocsp responder: cert not contains authority_information_access ext
 location /t {
     content_by_lua_block {
         local shell = require("resty.shell")
-        local cmd = [[ /usr/bin/openssl ocsp -index t/certs/ocsp/index.txt -port 11451 -rsigner t/certs/ocsp/signer.crt -rkey t/certs/ocsp/signer.key -CA t/certs/apisix.crt -nrequest 16 2>&1 1>/dev/null & ]]
+        local cmd = [[ /usr/bin/openssl ocsp -index t/apisix-plugin-ocsp/index.txt -port 11451 -rsigner t/apisix-plugin-ocsp/signer.crt -rkey t/apisix-plugin-ocsp/signer.key -CA t/apisix-plugin-ocsp/apisix.crt -nrequest 16 2>&1 1>/dev/null & ]]
         local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 1000, 8096)
         if not ok then
             ngx.log(ngx.WARN, "failed to execute the script with status: " .. status .. ", reason: " .. reason .. ", stderr: " .. stderr)
@@ -307,8 +307,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_good.crt")
-        local ssl_key =  t.read_file("t/certs/ocsp/rsa_good.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_good.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/rsa_good.key")
 
         local data = {
             cert = ssl_cert,
@@ -363,11 +363,11 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local rsa_cert = t.read_file("t/certs/ocsp/rsa_good.crt")
-        local rsa_key =  t.read_file("t/certs/ocsp/rsa_good.key")
+        local rsa_cert = t.read_file("t/apisix-plugin-ocsp/rsa_good.crt")
+        local rsa_key =  t.read_file("t/apisix-plugin-ocsp/rsa_good.key")
 
-        local ecc_cert = t.read_file("t/certs/ocsp/ecc_good.crt")
-        local ecc_key =  t.read_file("t/certs/ocsp/ecc_good.key")
+        local ecc_cert = t.read_file("t/apisix-plugin-ocsp/ecc_good.crt")
+        local ecc_key =  t.read_file("t/apisix-plugin-ocsp/ecc_good.key")
 
         local data = {
             cert = rsa_cert,
@@ -460,8 +460,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_revoked.crt")
-        local ssl_key =  t.read_file("t/certs/ocsp/rsa_revoked.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_revoked.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/rsa_revoked.key")
 
         local data = {
             cert = ssl_cert,
@@ -518,8 +518,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_revoked.crt")
-        local ssl_key =  t.read_file("t/certs/ocsp/rsa_revoked.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_revoked.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/rsa_revoked.key")
 
         local data = {
             cert = ssl_cert,
@@ -575,8 +575,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_unknown.crt")
-        local ssl_key =  t.read_file("t/certs/ocsp/rsa_unknown.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_unknown.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/rsa_unknown.key")
 
         local data = {
             cert = ssl_cert,
@@ -633,8 +633,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_unknown.crt")
-        local ssl_key =  t.read_file("t/certs/ocsp/rsa_unknown.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_unknown.crt")
+        local ssl_key =  t.read_file("t/apisix-plugin-ocsp/rsa_unknown.key")
 
         local data = {
             cert = ssl_cert,
@@ -688,7 +688,7 @@ qr/Cert Status: unknown/
 location /t {
     content_by_lua_block {
         local shell = require("resty.shell")
-        local cmd = [[ /usr/bin/openssl ocsp -index t/certs/ocsp/index.txt -port 12345 -rsigner t/certs/ocsp/signer.crt -rkey t/certs/ocsp/signer.key -CA t/certs/apisix.crt -nrequest 2 2>&1 1>/dev/null & ]]
+        local cmd = [[ /usr/bin/openssl ocsp -index t/apisix-plugin-ocsp/index.txt -port 12345 -rsigner t/apisix-plugin-ocsp/signer.crt -rkey t/apisix-plugin-ocsp/signer.key -CA t/apisix-plugin-ocsp/apisix.crt -nrequest 2 2>&1 1>/dev/null & ]]
         local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 1000, 8096)
         if not ok then
             ngx.log(ngx.WARN, "failed to execute the script with status: " .. status .. ", reason: " .. reason .. ", stderr: " .. stderr)
@@ -707,8 +707,8 @@ location /t {
         local core = require("apisix.core")
         local t = require("lib.test_admin")
 
-        local ssl_cert = t.read_file("t/certs/ocsp/rsa_good.crt")
-        local ssl_key  = t.read_file("t/certs/ocsp/rsa_good.key")
+        local ssl_cert = t.read_file("t/apisix-plugin-ocsp/rsa_good.crt")
+        local ssl_key  = t.read_file("t/apisix-plugin-ocsp/rsa_good.key")
 
         local data = {
             cert = ssl_cert,
