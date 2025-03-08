@@ -37,7 +37,7 @@ add_block_preprocessor(sub {
     # setup default conf.yaml
     my $extra_yaml_config = $block->extra_yaml_config // <<_EOC_;
 plugins:
-    - ocsp-stapling
+    - ocsp
 _EOC_
 
     $block->set_value("extra_yaml_config", $extra_yaml_config);
@@ -51,7 +51,7 @@ run_tests;
 
 __DATA__
 
-=== TEST 1: enable mtls and ocsp-stapling plugin in route, but disable client cert ocsp verify
+=== TEST 1: enable mtls and ocsp plugin in route, but disable client cert ocsp verify
 --- config
     location /t {
         content_by_lua_block {
@@ -62,7 +62,7 @@ __DATA__
             local ssl_key  = t.read_file("t/apisix-plugin-ocsp/mtls_server.key")
             local data = {
                 plugins = {
-                    ["ocsp-stapling"] = {},
+                    ["ocsp"] = {},
                 },
                 upstream = {
                     type = "roundrobin",
@@ -145,7 +145,7 @@ no client cert ocsp verify required
 
 
 
-=== TEST 6: enable mtls and ocsp-stapling plugin in route, enable client cert ocsp verify
+=== TEST 6: enable mtls and ocsp plugin in route, enable client cert ocsp verify
 --- config
     location /t {
         content_by_lua_block {
@@ -156,7 +156,7 @@ no client cert ocsp verify required
             local ssl_key  = t.read_file("t/apisix-plugin-ocsp/mtls_server.key")
             local data = {
                 plugins = {
-                    ["ocsp-stapling"] = {},
+                    ["ocsp"] = {},
                 },
                 upstream = {
                     type = "roundrobin",
@@ -256,7 +256,7 @@ failed to validate ocsp response: certificate status "revoked" in the OCSP respo
 
 
 
-=== TEST 12: enable mtls and ocsp-stapling plugin in route, enable client cert ocsp verify but override ssl_ocsp_responder
+=== TEST 12: enable mtls and ocsp plugin in route, enable client cert ocsp verify but override ssl_ocsp_responder
 --- config
     location /t {
         content_by_lua_block {
@@ -267,7 +267,7 @@ failed to validate ocsp response: certificate status "revoked" in the OCSP respo
             local ssl_key  = t.read_file("t/apisix-plugin-ocsp/mtls_server.key")
             local data = {
                 plugins = {
-                    ["ocsp-stapling"] = {},
+                    ["ocsp"] = {},
                 },
                 upstream = {
                     type = "roundrobin",

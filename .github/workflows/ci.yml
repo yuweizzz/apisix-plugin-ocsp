@@ -35,14 +35,16 @@ jobs:
 
       - name: Run test
         run: |
-          cp ocsp-stapling.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
-          cp ocsp-stapling.t /usr/local/apisix-dev/apisix-master/t/plugin/
-          cp ocsp-stapling2.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp ocsp.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
+          cp ocsp.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp ocsp.t /usr/local/apisix-dev/apisix-master/t/plugin/
           cp -r certs /usr/local/apisix-dev/apisix-master/t/apisix-plugin-ocsp/
+          sed -i 's/ocsp-stapling/ocsp/g' /usr/local/apisix-dev/apisix-master/apisix/cli/ngx_tpl.lua
+          sed -i 's/ocsp-stapling/ocsp/g' /usr/local/apisix-dev/apisix-master/t/APISIX.pm
           export PATH=/usr/local/apisix-dev/openresty/bin:$PATH
           export PERL5LIB=.:$PERL5LIB
           export TEST_NGINX_BINARY=/usr/local/apisix-dev/openresty/nginx/sbin/nginx
           cd /usr/local/apisix-dev/apisix-master
           /usr/local/apisix-dev/apisix-master/bin/apisix init
           /usr/local/apisix-dev/apisix-master/bin/apisix init_etcd
-          prove -I test-nginx/lib -r t/plugin/ocsp-stapling*
+          prove -I test-nginx/lib -r t/plugin/ocsp*
