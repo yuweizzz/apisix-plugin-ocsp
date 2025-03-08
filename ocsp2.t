@@ -84,8 +84,7 @@ __DATA__
                 client = {
                     ca = ssl_ca_cert,
                 },
-                ocsp_stapling = {
-                    enabled = true,
+                ocsp = {
                     ssl_ocsp = "off",
                 }
             }
@@ -178,8 +177,7 @@ no client cert ocsp verify required
                 client = {
                     ca = ssl_ca_cert,
                 },
-                ocsp_stapling = {
-                    enabled = true,
+                ocsp = {
                     ssl_ocsp = "leaf",
                 }
             }
@@ -289,8 +287,7 @@ failed to validate ocsp response: certificate status "revoked" in the OCSP respo
                 client = {
                     ca = ssl_ca_cert,
                 },
-                ocsp_stapling = {
-                    enabled = true,
+                ocsp = {
                     ssl_ocsp = "leaf",
                     ssl_ocsp_responder = "http://127.0.0.1:12345/",
                 }

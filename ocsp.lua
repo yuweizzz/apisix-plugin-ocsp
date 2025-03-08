@@ -86,7 +86,7 @@ local function fetch_ocsp_resp(der_cert_chain, responder)
 end
 
 
-local function set_ocsp_resp(der_cert_chain, responder, skip_verify)
+local function set_ocsp_resp(der_cert_chain, responder, need_verify)
     local ocsp_resp = ocsp_resp_cache:get(der_cert_chain)
     if ocsp_resp == nil then
         core.log.info("ocsp response cache not found, fetch it from ocsp responder")
@@ -97,7 +97,7 @@ local function set_ocsp_resp(der_cert_chain, responder, skip_verify)
         end
     end
 
-    if not skip_verify then
+    if need_verify then
         local ok, next_update_or_err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
         if not ok then
             return false, "failed to validate ocsp response: " .. err
@@ -284,7 +284,7 @@ function _M.init()
             },
             ssl_stapling_verify = {
                 type = "boolean",
-                default = false,
+                default = true,
             },
             ssl_stapling_responder = {
                 type = "string",

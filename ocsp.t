@@ -93,11 +93,10 @@ location /t {
 
         for _, conf in ipairs({
             {},
-            {enabled = true},
-            {skip_verify = true},
-            {cache_ttl = 6000},
-            {enabled = true, skip_verify = true, cache_ttl = 6000},
-            {enabled = true, skip_verify = true, cache_ttl = 6000, ssl_stapling_responder = "http://localhost"},
+            {ssl_stapling = true},
+            {ssl_stapling_verify = true},
+            {ssl_stapling = true, ssl_stapling_verify = true},
+            {ssl_stapling = true, ssl_stapling_verify = true, ssl_stapling_responder = "http://localhost"},
             {ssl_ocsp = "leaf"},
             {ssl_ocsp = "leaf", ssl_ocsp_responder = "http://localhost"},
         }) do
@@ -111,14 +110,13 @@ location /t {
     }
 }
 --- response_body
-{"cache_ttl":3600,"enabled":false,"skip_verify":false,"ssl_ocsp":"off"}
-{"cache_ttl":3600,"enabled":true,"skip_verify":false,"ssl_ocsp":"off"}
-{"cache_ttl":3600,"enabled":false,"skip_verify":true,"ssl_ocsp":"off"}
-{"cache_ttl":6000,"enabled":false,"skip_verify":false,"ssl_ocsp":"off"}
-{"cache_ttl":6000,"enabled":true,"skip_verify":true,"ssl_ocsp":"off"}
-{"cache_ttl":6000,"enabled":true,"skip_verify":true,"ssl_ocsp":"off","ssl_stapling_responder":"http://localhost"}
-{"cache_ttl":3600,"enabled":false,"skip_verify":false,"ssl_ocsp":"leaf"}
-{"cache_ttl":3600,"enabled":false,"skip_verify":false,"ssl_ocsp":"leaf","ssl_ocsp_responder":"http://localhost"}
+{"ssl_ocsp":"off","ssl_stapling":false,"ssl_stapling_verify":true}
+{"ssl_ocsp":"off","ssl_stapling":true,"ssl_stapling_verify":true}
+{"ssl_ocsp":"off","ssl_stapling":false,"ssl_stapling_verify":true}
+{"ssl_ocsp":"off","ssl_stapling":true,"ssl_stapling_verify":true}
+{"ssl_ocsp":"off","ssl_stapling":true,ssl_stapling_responder:"http://localhost","ssl_stapling_verify":true}
+{"ssl_ocsp":"leaf","ssl_stapling":false,"ssl_stapling_verify":true}
+{"ssl_ocsp":"leaf","ssl_ocsp_responder":"http://localhost","ssl_stapling":false,"ssl_stapling_verify":true}
 
 
 
@@ -163,7 +161,7 @@ echo -n "Q" | $OPENSSL_BIN s_client -connect localhost:1994 -servername test.com
 --- response_body eval
 qr/CONNECTED/
 --- error_log
-no 'ocsp_stapling' field found, no need to run ocsp plugin
+no 'ocsp' field found, no need to run ocsp plugin
 
 
 
@@ -173,7 +171,7 @@ echo -n "Q" | $OPENSSL_BIN s_client -connect localhost:1994 -servername test.com
 --- response_body eval
 qr/OCSP response: no response sent/
 --- error_log
-no 'ocsp_stapling' field found, no need to run ocsp plugin
+no 'ocsp' field found, no need to run ocsp plugin
 
 
 
@@ -191,8 +189,8 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp.test.com",
-            ocsp_stapling = {
-                enabled = true
+            ocsp = {
+                ssl_stapling = true
             }
         }
 
@@ -239,8 +237,8 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "test.com",
-            ocsp_stapling = {
-                enabled = true
+            ocsp = {
+                ssl_stapling = true
             }
         }
 
@@ -314,8 +312,8 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp.test.com",
-            ocsp_stapling = {
-                enabled = true
+            ocsp = {
+                ssl_stapling = true
             }
         }
 
@@ -375,8 +373,8 @@ location /t {
             certs = { ecc_cert },
             keys = { ecc_key },
             sni = "ocsp.test.com",
-            ocsp_stapling = {
-                enabled = true
+            ocsp = {
+                ssl_stapling = true
             }
         }
 
@@ -467,8 +465,8 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp-revoked.test.com",
-            ocsp_stapling = {
-                enabled = true
+            ocsp = {
+                ssl_stapling = true
             }
         }
 
@@ -525,9 +523,9 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp-revoked.test.com",
-            ocsp_stapling = {
-                enabled = true,
-                skip_verify = true,
+            ocsp = {
+                ssl_stapling = true,
+                ssl_stapling_verify = false,
             }
         }
 
@@ -582,8 +580,8 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp-unknown.test.com",
-            ocsp_stapling = {
-                enabled = true
+            ocsp = {
+                ssl_stapling = true
             }
         }
 
@@ -640,9 +638,9 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp-unknown.test.com",
-            ocsp_stapling = {
-                enabled = true,
-                skip_verify = true,
+            ocsp = {
+                ssl_stapling = true,
+                ssl_stapling_verify = false,
             }
         }
 
@@ -714,8 +712,8 @@ location /t {
             cert = ssl_cert,
             key = ssl_key,
             sni = "ocsp.test.com",
-            ocsp_stapling = {
-                enabled = true,
+            ocsp = {
+                ssl_stapling = true,
                 ssl_stapling_responder = "http://127.0.0.1:12345/",
             }
         }
