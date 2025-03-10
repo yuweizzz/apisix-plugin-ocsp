@@ -152,7 +152,7 @@ echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername 
 --- response_body eval
 qr/CONNECTED/
 --- error_log
-fetch ocsp response ok, cache with ttl: 1200 seconds
+fetch ocsp response ok, cache with ttl: 600 seconds
 
 
 
@@ -163,7 +163,7 @@ echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername 
 --- response_body eval
 qr/Cert Status: good/
 --- error_log
-fetch ocsp response ok, cache with ttl: 1200 seconds
+fetch ocsp response ok, cache with ttl: 600 seconds
 
 
 
@@ -387,7 +387,7 @@ curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:12
 --- response_body eval
 qr/hello world/
 --- error_log
-fetch ocsp response ok, cache with ttl: 1200 seconds
+fetch ocsp response ok, cache with ttl: 600 seconds
 validate client cert ocsp response ok
 
 
@@ -398,7 +398,7 @@ curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:12
 --- response_body eval
 qr/hello world/
 --- error_log
-fetch ocsp response ok, cache with ttl: 1200 seconds
+fetch ocsp response ok, cache with ttl: 600 seconds
 validate client cert ocsp response ok
 
 
