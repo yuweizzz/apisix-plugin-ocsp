@@ -38,6 +38,7 @@ jobs:
           cp ocsp.lua /usr/local/apisix-dev/apisix-master/apisix/plugins/
           cp ocsp.t /usr/local/apisix-dev/apisix-master/t/plugin/
           cp ocsp2.t /usr/local/apisix-dev/apisix-master/t/plugin/
+          cp ocsp3.t /usr/local/apisix-dev/apisix-master/t/plugin/
           cp -r certs /usr/local/apisix-dev/apisix-master/t/apisix-plugin-ocsp/
           sed -i 's/ocsp-stapling/ocsp/g' /usr/local/apisix-dev/apisix-master/apisix/cli/ngx_tpl.lua
           sed -i 's/ocsp-stapling/ocsp/g' /usr/local/apisix-dev/apisix-master/t/APISIX.pm
@@ -49,3 +50,4 @@ jobs:
           /usr/local/apisix-dev/apisix-master/bin/apisix init_etcd
           prove -I test-nginx/lib -r t/plugin/ocsp.t
           prove -I test-nginx/lib -r t/plugin/ocsp2.t
+          prove -I test-nginx/lib -r t/plugin/ocsp3.t
