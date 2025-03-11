@@ -5,8 +5,11 @@
 ## Changelog
 
 - v0.1: import from apisix v3.9.0 release.
+
 - v0.2: support ocsp validation of the client certificate.
+
 - v0.3:
+
 1. rename plugin from 'ocsp-stapling' to 'ocsp'.
 2. rename attributes, same as the nginx directive.
 3. remove ttl settings, use nextupdate feild as ttl time, the featrue required openresty 1.27.1.1 version.
