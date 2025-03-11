@@ -1,13 +1,3 @@
----
-title: ocsp-stapling
-keywords:
-  - Apache APISIX
-  - API 网关
-  - 插件
-  - ocsp-stapling
-description: 本文介绍了 API 网关 Apache APISIX ocsp-stapling 插件的相关信息。
----
-
 <!--
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -29,7 +19,7 @@ description: 本文介绍了 API 网关 Apache APISIX ocsp-stapling 插件的相
 
 ## 描述
 
-`ocsp-stapling` 插件可以动态地设置 Nginx 中 [OCSP stapling](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_stapling) 的相关行为。
+`ocsp-stapling` 插件可以动态地设置 Nginx 中 [OCSP stapling](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_stapling) 和 [客户端证书 OCSP 验证](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_ocsp) 的相关行为。
 
 ## 启用插件
 
@@ -38,7 +28,7 @@ description: 本文介绍了 API 网关 Apache APISIX ocsp-stapling 插件的相
 ```yaml
 plugins:
   - ...
-  - ocsp-stapling
+  - ocsp
 ```
 
 修改配置文件之后，重启 APISIX 或者通过插件热加载接口来使配置生效：
@@ -57,12 +47,14 @@ plugins:
 
 | 名称           | 类型                 | 必选项   | 默认值          | 有效值       | 描述                                                                  |
 |----------------|----------------------|----------|---------------|--------------|-----------------------------------------------------------------------|
-| enabled        | boolean              | False    | false         |              | 与 `ssl_stapling` 指令类似，用于启用或禁用 OCSP stapling 特性            |
-| skip_verify    | boolean              | False    | false         |              | 与 `ssl_stapling_verify` 指令类似，用于启用或禁用对于 OCSP 响应结果的校验 |
+| ssl_stapling        | boolean              | False    | false         |              | 与 `ssl_stapling` 指令类似，用于启用或禁用 OCSP stapling 特性            |
+| ssl_stapling_verify    | boolean              | False    | true         |              | 与 `ssl_stapling_verify` 指令类似，用于启用或禁用对于 OCSP 响应结果的校验 |
 | ssl_stapling_responder | string       | False    | ""            |"http://..."  | 与 `ssl_stapling_responder` 指令类似，用于覆写服务端证书中的 OCSP 响应器 url 地址 |
 | ssl_ocsp    | string                  | False    | "off"         |["off", "leaf"]| 与 `ssl_ocsp` 指令类似，用于启用或禁用对于客户端证书的 OCSP 验证 |
 | ssl_ocsp_responder        | string    | False    | ""            |"http://..."  | 与 `ssl_ocsp_responder` 指令类似，用于覆写客户端证书中的 OCSP 响应器 url 地址  |
-| cache_ttl      | integer              | False    | 3600          | >= 60        | 指定 OCSP 响应结果的缓存时间                                            |
+
+> [!NOTE]
+> 升级到 v0.3 版本之后, 不再需要手动指定缓存时间，插件会使用 OCSP 响应中的 `next Update` 字段作为缓存时间值。
 
 ## 使用示例
 
@@ -77,8 +69,8 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "cert" : "'"$(cat server.crt)"'",
     "key": "'"$(cat server.key)"'",
     "snis": ["test.com"],
-    "ocsp_stapling": {
-        "enabled": true
+    "ocsp": {
+        "ssl_stapling": true
     }
 }'
 ```
@@ -108,8 +100,8 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "cert" : "'"$(cat server.crt)"'",
     "key": "'"$(cat server.key)"'",
     "snis": ["test.com"],
-    "ocsp_stapling": {
-        "enabled": false
+    "ocsp": {
+        "ssl_stapling": false
     }
 }'
 ```
@@ -130,8 +122,7 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "client": {
         "ca": "'"$(cat ca.crt)"'"
     },
-    "ocsp_stapling": {
-        "enabled": true，
+    "ocsp": {
         "ssl_ocsp": "leaf"
     }
 }'
@@ -145,7 +136,7 @@ curl -i http://127.0.0.1:9180/apisix/admin/routes/1 \
 {
     "uri": "/",
     "plugins": {
-        "ocsp-stapling": {}
+        "ocsp": {}
     },
     "upstream": {
         "type": "roundrobin",
@@ -190,8 +181,7 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "client": {
         "ca": "'"$(cat ca.crt)"'"
     },
-    "ocsp_stapling": {
-        "enabled": true，
+    "ocsp": {
         "ssl_ocsp": "off"
     }
 }'
@@ -199,13 +189,13 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
 
 ## 删除插件
 
-在删除插件之前，需要确保所有的 SSL 资源都已经移除 `ocsp_stapling` 字段，可以通过以下命令实现对单个 SSL 资源的对应字段移除：
+在删除插件之前，需要确保所有的 SSL 资源都已经移除 `ocsp` 字段，可以通过以下命令实现对单个 SSL 资源的对应字段移除：
 
 ```shell
 curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
 -H "X-API-KEY: $admin_key" -X PATCH -d '
 {
-    "ocsp_stapling": null
+    "ocsp": null
 }'
 ```
 
@@ -214,7 +204,7 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
 ```yaml
 plugins:
   - ...
-  # - ocsp-stapling
+  # - ocsp
 ```
 
 修改配置文件之后，重启 APISIX 或者通过插件热加载接口来使配置生效：

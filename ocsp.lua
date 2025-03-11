@@ -17,15 +17,15 @@
 -- under the License.
 --
 
+local ngx = ngx
 local require = require
 local http = require("resty.http")
-local ngx = ngx
 local ngx_ocsp = require("ngx.ocsp")
 local ngx_ssl = require("ngx.ssl")
 local radixtree_sni = require("apisix.ssl.router.radixtree_sni")
 local core = require("apisix.core")
 
-local plugin_name = "ocsp-stapling"
+local plugin_name = "ocsp"
 local ocsp_resp_cache = ngx.shared[plugin_name]
 
 local plugin_schema = {
@@ -36,7 +36,7 @@ local plugin_schema = {
 local _M = {
     name = plugin_name,
     schema = plugin_schema,
-    version = 0.2,
+    version = 0.3,
     priority = -44,
 }
 
@@ -86,7 +86,7 @@ local function fetch_ocsp_resp(der_cert_chain, responder)
 end
 
 
-local function set_ocsp_resp(der_cert_chain, responder, skip_verify, cache_ttl)
+local function set_ocsp_resp(der_cert_chain, responder, need_verify)
     local ocsp_resp = ocsp_resp_cache:get(der_cert_chain)
     if ocsp_resp == nil then
         core.log.info("ocsp response cache not found, fetch it from ocsp responder")
@@ -95,14 +95,18 @@ local function set_ocsp_resp(der_cert_chain, responder, skip_verify, cache_ttl)
         if ocsp_resp == nil then
             return false, err
         end
-        ocsp_resp_cache:set(der_cert_chain, ocsp_resp, cache_ttl)
-        core.log.info("fetch ocsp response ok, cache with ttl: " .. cache_ttl .. " seconds")
     end
 
-    if not skip_verify then
-        local ok, err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
+    if need_verify then
+        local ok, next_update_or_err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
         if not ok then
-            return false, "failed to validate ocsp response: " .. err
+            return false, "failed to validate ocsp response: " .. next_update_or_err
+        end
+        -- next_update present
+        if next_update_or_err ~= nil then
+            local ttl = next_update_or_err - ngx.time()
+            ocsp_resp_cache:set(der_cert_chain, ocsp_resp, ttl)
+            core.log.info("fetch ocsp response ok, cache with ttl: " .. ttl .. " seconds")
         end
     end
 
@@ -124,12 +128,12 @@ local function set_cert_and_key(sni, value)
         return original_set_cert_and_key(sni, value)
     end
 
-    if not value.ocsp_stapling then
-        core.log.info("no 'ocsp_stapling' field found, no need to run ocsp-stapling plugin")
+    if not value.ocsp then
+        core.log.info("no 'ocsp' field found, no need to run ocsp plugin")
         return original_set_cert_and_key(sni, value)
     end
 
-    if not value.ocsp_stapling.enabled then
+    if not value.ocsp.ssl_stapling then
         return original_set_cert_and_key(sni, value)
     end
 
@@ -164,7 +168,7 @@ local function set_cert_and_key(sni, value)
         return true
     end
 
-    local responder = value.ocsp_stapling.ssl_stapling_responder
+    local responder = value.ocsp.ssl_stapling_responder
     if responder == nil then
         -- no overrides responder, get ocsp responder from cert
         responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
@@ -182,8 +186,7 @@ local function set_cert_and_key(sni, value)
 
     ok, err = set_ocsp_resp(der_cert_chain,
                             responder,
-                            value.ocsp_stapling.skip_verify,
-                            value.ocsp_stapling.cache_ttl)
+                            value.ocsp.ssl_stapling_verify)
     if not ok then
         core.log.error("no ocsp response send: ", err)
     end
@@ -203,7 +206,7 @@ function _M.rewrite(conf, ctx)
         return
     end
 
-    local ssl_ocsp = matched_ssl.value.ocsp_stapling.ssl_ocsp
+    local ssl_ocsp = matched_ssl.value.ocsp.ssl_ocsp
     local client_verify_res = ctx.var.ssl_client_verify
     -- only client verify ok and ssl_ocsp is "leaf" need to validate ocsp response
     if ssl_ocsp == "leaf" and client_verify_res == "SUCCESS" then
@@ -219,7 +222,7 @@ function _M.rewrite(conf, ctx)
         local ocsp_resp = ocsp_resp_cache:get(der_cert_chain)
         if ocsp_resp == nil then
             core.log.info("not ocsp resp cache found, fetch from ocsp responder")
-            local responder = matched_ssl.value.ocsp_stapling.ssl_ocsp_responder
+            local responder = matched_ssl.value.ocsp.ssl_ocsp_responder
             if responder == nil then
                 -- no overrides responder, get ocsp responder from cert
                 responder, err = ngx_ocsp.get_ocsp_responder_from_der_chain(der_cert_chain)
@@ -239,16 +242,18 @@ function _M.rewrite(conf, ctx)
                 core.log.error("failed to get ocsp respone: ", err)
                 return 495
             end
-            core.log.info("fetch ocsp resp ok, cache it")
-            ocsp_resp_cache:set(der_cert_chain,
-                                ocsp_resp, matched_ssl.value.ocsp_stapling.cache_ttl)
         end
 
-        local ocsp_ok
-        ocsp_ok, err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
+        local ocsp_ok, next_update_or_err = ngx_ocsp.validate_ocsp_response(ocsp_resp, der_cert_chain)
         if not ocsp_ok then
-            core.log.error("failed to validate ocsp response: ", err)
+            core.log.error("failed to validate ocsp response: ", next_update_or_err)
             return 495
+        end
+        -- next_update present
+        if next_update_or_err ~= nil then
+            local ttl = next_update_or_err - ngx.time()
+            ocsp_resp_cache:set(der_cert_chain, ocsp_resp, ttl)
+            core.log.info("fetch ocsp response ok, cache with ttl: " .. ttl .. " seconds")
         end
         core.log.info("validate client cert ocsp response ok")
         return
@@ -266,20 +271,20 @@ function _M.init()
     original_set_cert_and_key = radixtree_sni.set_cert_and_key
     radixtree_sni.set_cert_and_key = set_cert_and_key
 
-    if core.schema.ssl.properties.ocsp_stapling ~= nil then
-        core.log.error("Field 'ocsp_stapling' is occupied")
+    if core.schema.ssl.properties.ocsp ~= nil then
+        core.log.error("Field 'ocsp' is occupied")
     end
 
-    core.schema.ssl.properties.ocsp_stapling = {
+    core.schema.ssl.properties.ocsp = {
         type = "object",
         properties = {
-            enabled = {
+            ssl_stapling = {
                 type = "boolean",
                 default = false,
             },
-            skip_verify = {
+            ssl_stapling_verify = {
                 type = "boolean",
-                default = false,
+                default = true,
             },
             ssl_stapling_responder = {
                 type = "string",
@@ -294,11 +299,6 @@ function _M.init()
                 type = "string",
                 pattern = [[^http://]],
             },
-            cache_ttl = {
-                type = "integer",
-                minimum = 60,
-                default = 3600,
-            },
         }
     }
 
@@ -307,7 +307,7 @@ end
 
 function _M.destroy()
     radixtree_sni.set_cert_and_key = original_set_cert_and_key
-    core.schema.ssl.properties.ocsp_stapling = nil
+    core.schema.ssl.properties.ocsp = nil
     ocsp_resp_cache:flush_all()
 end
 
