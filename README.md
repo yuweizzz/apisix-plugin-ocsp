@@ -15,8 +15,8 @@ support ocsp validation of the client certificate.
 ### v0.3
 
 - rename plugin from 'ocsp-stapling' to 'ocsp'.
-- rename attributes, same as the nginx directive.
-- remove ttl settings, use nextupdate feild as ttl time, the featrue required openresty 1.27.1.1 version.
+- rename attributes, new attribute names are the same as the nginx directive.
+- remove ttl settings, use nextupdate field as ttl time. This feature requires OpenResty version 1.27.1.1.
 
 ## Installation
 
@@ -35,7 +35,7 @@ cp ocsp.lua <path-to-apisix-source-code>/apisix/plugins/ocsp.lua
 
 ## Description
 
-The `ocsp-stapling` Plugin dynamically sets the behavior of [OCSP stapling](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_stapling) in Nginx.
+The `ocsp` Plugin dynamically sets the behavior of [OCSP stapling](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_stapling) and [OCSP validation of the client certificate](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_ocsp) in Nginx.
 
 ## Enable Plugin
 
@@ -44,7 +44,7 @@ This Plugin is disabled by default. Modify the config file to enable the plugin:
 ```yaml title="./conf/config.yaml"
 plugins:
   - ...
-  - ocsp-stapling
+  - ocsp
 ```
 
 After modifying the config file, reload APISIX or send an hot-loaded HTTP request through the Admin API to take effect:
@@ -59,16 +59,18 @@ After modifying the config file, reload APISIX or send an hot-loaded HTTP reques
 
 ## Attributes
 
-The attributes of this plugin are stored in specific field `ocsp_stapling` within SSL Resource.
+The attributes of this plugin are stored in specific field `ocsp` within SSL Resource.
 
 | Name           | Type                 | Required | Default       | Valid values | Description                                                                                   |
 |----------------|----------------------|----------|---------------|--------------|-----------------------------------------------------------------------------------------------|
-| enabled        | boolean              | False    | false         |              | Like the `ssl_stapling` directive, enables or disables OCSP stapling feature.                 |
-| skip_verify    | boolean              | False    | false         |              | Like the `ssl_stapling_verify` directive, enables or disables verification of OCSP responses. |
+| ssl_stapling   | boolean              | False    | false         |              | Like the `ssl_stapling` directive, enables or disables OCSP stapling feature.                 |
+| ssl_stapling_verify    | boolean              | False    | true         |              | Like the `ssl_stapling_verify` directive, enables or disables verification of OCSP responses. |
 | ssl_stapling_responder | string       | False    | ""            |"http://..."  | Like the `ssl_stapling_responder` directive, overrides the URL of the OCSP responder specified in the "Authority Information Access" certificate extension of server certificates. |
 | ssl_ocsp    | string                  | False    | "off"         |["off", "leaf"]| Like the `ssl_ocsp` directive, enables or disables OCSP validation of the client certificate. |
 | ssl_ocsp_responder        | string    | False    | ""            |"http://..."  | Like the `ssl_ocsp_responder` directive, overrides the URL of the OCSP responder specified in the "Authority Information Access" certificate extension for validation of client certificates.  |
-| cache_ttl      | integer              | False    | 3600          | >= 60        | Specifies the expired time of OCSP response cache.                                            |
+
+> [!NOTE]
+> In version v0.3, we don't need to specify TTL time anymore; use the 'next Update' field from OCSP responses as the time value.
 
 ## Example usage
 
@@ -83,8 +85,8 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "cert" : "'"$(cat server.crt)"'",
     "key": "'"$(cat server.key)"'",
     "snis": ["test.com"],
-    "ocsp_stapling": {
-        "enabled": true
+    "ocsp": {
+        "ssl_stapling": true
     }
 }'
 ```
@@ -114,8 +116,8 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "cert" : "'"$(cat server.crt)"'",
     "key": "'"$(cat server.key)"'",
     "snis": ["test.com"],
-    "ocsp_stapling": {
-        "enabled": false
+    "ocsp": {
+        "ssl_stapling": false
     }
 }'
 ```
@@ -136,8 +138,7 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "client": {
         "ca": "'"$(cat ca.crt)"'"
     },
-    "ocsp_stapling": {
-        "enabled": true，
+    "ocsp": {
         "ssl_ocsp": "leaf"
     }
 }'
@@ -151,7 +152,7 @@ curl -i http://127.0.0.1:9180/apisix/admin/routes/1 \
 {
     "uri": "/",
     "plugins": {
-        "ocsp-stapling": {}
+        "ocsp": {}
     },
     "upstream": {
         "type": "roundrobin",
@@ -196,8 +197,7 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
     "client": {
         "ca": "'"$(cat ca.crt)"'"
     },
-    "ocsp_stapling": {
-        "enabled": true，
+    "ocsp": {
         "ssl_ocsp": "off"
     }
 }'
@@ -205,13 +205,13 @@ curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
 
 ## Delete Plugin
 
-Make sure all your SSL Resource doesn't contains `ocsp_stapling` field anymore. To remove this field, you can make a request as shown below:
+Make sure all your SSL Resource doesn't contains `ocsp` field anymore. To remove this field, you can make a request as shown below:
 
 ```shell
 curl http://127.0.0.1:9180/apisix/admin/ssls/1 \
 -H "X-API-KEY: $admin_key" -X PATCH -d '
 {
-    "ocsp_stapling": null
+    "ocsp": null
 }'
 ```
 
@@ -220,7 +220,7 @@ Modify the config file `./conf/config.yaml` to disable the plugin:
 ```yaml title="./conf/config.yaml"
 plugins:
   - ...
-  # - ocsp-stapling
+  # - ocsp
 ```
 
 After modifying the config file, reload APISIX or send an hot-loaded HTTP request through the Admin API to take effect:
