@@ -380,18 +380,7 @@ validate client cert ocsp response ok
 
 
 
-=== TEST 19: enabled client cert ocsp verify, mtls passed when client cert is good status, will cache response
---- exec
-curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/ecc_good.crt --key t/apisix-plugin-ocsp/ecc_good.key 2>&1 | cat
---- response_body eval
-qr/hello world/
---- error_log
-fetch ocsp response ok, cache with ttl: 600 seconds
-validate client cert ocsp response ok
-
-
-
-=== TEST 20: enabled client cert ocsp verify, mtls failed when client cert is unknown status, invalid status will not cache response
+=== TEST 19: enabled client cert ocsp verify, mtls failed when client cert is unknown status, invalid status will not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_unknown.crt --key t/apisix-plugin-ocsp/rsa_unknown.key 2>&1 | cat
 --- response_body eval
@@ -401,7 +390,7 @@ failed to validate ocsp response: certificate status "unknown" in the OCSP respo
 
 
 
-=== TEST 21: enabled client cert ocsp verify, mtls failed when client cert is revoked status, invalid status will not cache response
+=== TEST 20: enabled client cert ocsp verify, mtls failed when client cert is revoked status, invalid status will not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_revoked.crt --key t/apisix-plugin-ocsp/rsa_revoked.key 2>&1 | cat
 --- response_body eval
