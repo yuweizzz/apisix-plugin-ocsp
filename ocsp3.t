@@ -106,7 +106,7 @@ location /t {
 
 
 
-=== TEST 3: hit, handshake ok:1, no nextupdate, no need to cache response
+=== TEST 3: hit, handshake ok, no nextupdate, no need to cache response:1
 --- exec
 echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername ocsp.test.com 2>&1 | cat
 --- max_size: 16096
@@ -117,7 +117,7 @@ fetch ocsp response ok, cache with ttl
 
 
 
-=== TEST 4: hit, get ocsp response and status is good:2, no nextupdate, no need to cache response
+=== TEST 4: hit, get ocsp response and status is good, no nextupdate, no need to cache response:2
 --- exec
 echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername ocsp.test.com 2>&1 | cat
 --- max_size: 16096
@@ -145,7 +145,7 @@ location /t {
 
 
 
-=== TEST 6: hit, handshake ok:1, will cache ocsp response
+=== TEST 6: hit, handshake ok, will cache ocsp response:1
 --- exec
 echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername ocsp.test.com 2>&1 | cat
 --- max_size: 16096
@@ -156,7 +156,7 @@ fetch ocsp response ok, cache with ttl: 600 seconds
 
 
 
-=== TEST 7: hit, get ocsp response and status is good:2, will cache ocsp response
+=== TEST 7: hit, get ocsp response and status is good, will cache ocsp response:2
 --- exec
 echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername ocsp.test.com 2>&1 | cat
 --- max_size: 16096
@@ -167,7 +167,7 @@ fetch ocsp response ok, cache with ttl: 600 seconds
 
 
 
-=== TEST 8: cert with ocsp supported and revoked when enabled ocsp plugin
+=== TEST 8: cert with ocsp supported and revoked status when enabled ocsp plugin
 --- config
 location /t {
     content_by_lua_block {
@@ -222,7 +222,7 @@ location /t {
 
 
 
-=== TEST 10: hit revoked rsa cert, handshake ok:1, invalid status will not cacahe response
+=== TEST 10: hit revoked rsa cert, handshake ok, invalid status will not cache response:1
 --- exec
 echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername ocsp-revoked.test.com 2>&1 | cat
 --- response_body eval
@@ -234,7 +234,7 @@ fetch ocsp response ok, cache with ttl
 
 
 
-=== TEST 11: hit revoked rsa cert, no ocsp response send:2, invalid status will not cacahe response
+=== TEST 11: hit revoked rsa cert, no ocsp response send, invalid status will not cache response:2
 --- exec
 echo -n "Q" | $OPENSSL_BIN s_client -status -connect localhost:1994 -servername ocsp-revoked.test.com 2>&1 | cat
 --- response_body eval
@@ -304,7 +304,7 @@ GET /t
 location /t {
     content_by_lua_block {
         local shell = require("resty.shell")
-        local cmd = [[ /usr/bin/openssl ocsp -index t/apisix-plugin-ocsp/index.txt -port 11451 -rsigner t/apisix-plugin-ocsp/signer.crt -rkey t/apisix-plugin-ocsp/signer.key -CA t/apisix-plugin-ocsp/apisix.crt -nrequest 4 2>&1 1>/dev/null & ]]
+        local cmd = [[ /usr/bin/openssl ocsp -index t/apisix-plugin-ocsp/index.txt -port 11451 -rsigner t/apisix-plugin-ocsp/signer.crt -rkey t/apisix-plugin-ocsp/signer.key -CA t/apisix-plugin-ocsp/apisix.crt -nrequest 3 2>&1 1>/dev/null & ]]
         local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 1000, 8096)
         if not ok then
             ngx.log(ngx.WARN, "failed to execute the script with status: " .. status or "nil" .. ", reason: " .. reason .. ", stderr: " .. stderr)
@@ -316,7 +316,7 @@ location /t {
 
 
 
-=== TEST 14: enabled client cert ocsp verify, mtls passed when client cert is good status, not cacahe response
+=== TEST 14: enabled client cert ocsp verify, mtls passed when client cert is good status, not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_good.crt --key t/apisix-plugin-ocsp/rsa_good.key 2>&1 | cat
 --- response_body eval
@@ -328,19 +328,7 @@ fetch ocsp response ok, cache with ttl
 
 
 
-=== TEST 15: enabled client cert ocsp verify, mtls passed when client cert is good status, not cacahe response
---- exec
-curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/ecc_good.crt --key t/apisix-plugin-ocsp/ecc_good.key 2>&1 | cat
---- response_body eval
-qr/hello world/
---- error_log
-validate client cert ocsp response ok
---- no_error_log
-fetch ocsp response ok, cache with ttl
-
-
-
-=== TEST 16: enabled client cert ocsp verify, mtls failed when client cert is unknown status, not cacahe response
+=== TEST 15: enabled client cert ocsp verify, mtls failed when client cert is unknown status, not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_unknown.crt --key t/apisix-plugin-ocsp/rsa_unknown.key 2>&1 | cat
 --- response_body eval
@@ -352,7 +340,7 @@ fetch ocsp response ok, cache with ttl
 
 
 
-=== TEST 17: enabled client cert ocsp verify, mtls failed when client cert is revoked status, not cacahe response
+=== TEST 16: enabled client cert ocsp verify, mtls failed when client cert is revoked status, not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_revoked.crt --key t/apisix-plugin-ocsp/rsa_revoked.key 2>&1 | cat
 --- response_body eval
@@ -364,12 +352,12 @@ fetch ocsp response ok, cache with ttl
 
 
 
-=== TEST 18: run ocsp responder, return with nextupdate
+=== TEST 17: run ocsp responder, return with nextupdate
 --- config
 location /t {
     content_by_lua_block {
         local shell = require("resty.shell")
-        local cmd = [[ /usr/bin/openssl ocsp -index t/apisix-plugin-ocsp/index.txt -port 11451 -rsigner t/apisix-plugin-ocsp/signer.crt -rkey t/apisix-plugin-ocsp/signer.key -CA t/apisix-plugin-ocsp/apisix.crt -nmin +10 -nrequest 4 2>&1 1>/dev/null & ]]
+        local cmd = [[ /usr/bin/openssl ocsp -index t/apisix-plugin-ocsp/index.txt -port 11451 -rsigner t/apisix-plugin-ocsp/signer.crt -rkey t/apisix-plugin-ocsp/signer.key -CA t/apisix-plugin-ocsp/apisix.crt -nmin +10 -nrequest 3 2>&1 1>/dev/null & ]]
         local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 1000, 8096)
         if not ok then
             ngx.log(ngx.WARN, "failed to execute the script with status: " .. status or "nil" .. ", reason: " .. reason .. ", stderr: " .. stderr)
@@ -381,7 +369,7 @@ location /t {
 
 
 
-=== TEST 19: enabled client cert ocsp verify, mtls passed when client cert is good status, cacahe response
+=== TEST 18: enabled client cert ocsp verify, mtls passed when client cert is good status, will cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_good.crt --key t/apisix-plugin-ocsp/rsa_good.key 2>&1 | cat
 --- response_body eval
@@ -392,7 +380,7 @@ validate client cert ocsp response ok
 
 
 
-=== TEST 20: enabled client cert ocsp verify, mtls passed when client cert is good status, cacahe response
+=== TEST 19: enabled client cert ocsp verify, mtls passed when client cert is good status, will cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/ecc_good.crt --key t/apisix-plugin-ocsp/ecc_good.key 2>&1 | cat
 --- response_body eval
@@ -403,7 +391,7 @@ validate client cert ocsp response ok
 
 
 
-=== TEST 21: enabled client cert ocsp verify, mtls failed when client cert is unknown status, invalid status will not cacahe response
+=== TEST 20: enabled client cert ocsp verify, mtls failed when client cert is unknown status, invalid status will not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_unknown.crt --key t/apisix-plugin-ocsp/rsa_unknown.key 2>&1 | cat
 --- response_body eval
@@ -413,7 +401,7 @@ failed to validate ocsp response: certificate status "unknown" in the OCSP respo
 
 
 
-=== TEST 22: enabled client cert ocsp verify, mtls failed when client cert is revoked status, invalid status will not cacahe response
+=== TEST 21: enabled client cert ocsp verify, mtls failed when client cert is revoked status, invalid status will not cache response
 --- exec
 curl -i -v https://admin.apisix.dev:1994/hello --resolv admin.apisix.dev:1994:127.0.0.1 --cacert t/apisix-plugin-ocsp/mtls_ca.crt --cert t/apisix-plugin-ocsp/rsa_revoked.crt --key t/apisix-plugin-ocsp/rsa_revoked.key 2>&1 | cat
 --- response_body eval
